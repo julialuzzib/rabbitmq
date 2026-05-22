@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurante Digital - Produtor RabbitMQ</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; background-color: #f4f6f9; color: #333; }
+        .card { max-width: 500px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #2c3e50; margin-top: 0; }
+        button { display: block; width: 100%; padding: 14px; margin: 12px 0; font-size: 16px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; color: white; transition: background 0.2s; }
+        .btn-send { background-color: #3498db; }
+        .btn-send:hover { background-color: #2980b9; }
+        .btn-test { background-color: #e67e22; }
+        .btn-test:hover { background-color: #d35400; }
+        .panel-link { display: block; text-align: center; margin-top: 15px; color: #7f8c8d; text-decoration: none; font-size: 14px; }
+        .panel-link:hover { text-decoration: underline; color: #2c3e50; }
+        .terminal { background: #2c3e50; color: #2ecc71; padding: 15px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; min-height: 60px; margin-top: 25px; font-size: 14px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>🍔 O Restaurante Digital</h2>
+        <p style="color: #666; font-size: 14px; text-align: center; line-height: 1.5;">
+            Envie requisições HTTP para a API Node.js, que atuará como <strong>Produtor</strong> publicando as mensagens diretamente no <strong>RabbitMQ</strong>.
+        </p>
+        
+        <button class="btn-send" onclick="gerarPedidoUnico()">Enviar 1 Pedido Aleatório</button>
+        <button class="btn-test" onclick="gerarTesteDesacoplamento()">⚡ Enviar 5 Pedidos Rápidos (Para Teste)</button>
+        
+        <a href="http://localhost:15672" target="_blank" class="panel-link">⚙️ Abrir Painel Administrativo do RabbitMQ (guest/guest)</a>
+
+        <div class="terminal" id="output">> Pronto para enviar dados...</div>
+    </div>
+
+    <script>
+        let incrementalId = 100;
+        const cardapio = ["Hambúrguer Duplo 🍔", "Batata Frita Grande 🍟", "Combo Suprema Pizza 🍕", "Suco de Laranja Natural 🍊", "Combo Temaki e Sushi 🍣"];
+
+        async function dispararApi(pedido) {
+            const response = await fetch('/api/pedidos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(pedido)
+            });
+            return response.json();
+        }
+
+        async function gerarPedidoUnico() {
+            incrementalId++;
+            const item = cardapio[Math.floor(Math.random() * cardapio.length)];
+            const mesa = Math.floor(Math.random() * 15) + 1;
+
+            const pedido = { pedido_id: incrementalId, item, mesa };
+            const resposta = await dispararApi(pedido);
+            
+            document.getElementById('output').innerHTML = `> [PRODUTOR]: Pedido #${resposta.pedido.pedido_id} (${resposta.pedido.item}) enviado com sucesso às ${resposta.pedido.horario}!`;
+        }
+
+        async function gerarTesteDesacoplamento() {
+            document.getElementById('output').innerHTML = `> Enviando pacotes em rajada para o teste...`;
+            
+            for (let i = 0; i < 5; i++) {
+                incrementalId++;
+                const item = cardapio[Math.floor(Math.random() * cardapio.length)];
+                const mesa = Math.floor(Math.random() * 15) + 1;
+                await dispararApi({ pedido_id: incrementalId, item, mesa });
+            }
+            
+            document.getElementById('output').innerHTML = `> 🎉 [TESTE] 5 Pedidos enviados! Se os consumidores estiverem desligados, eles estarão acumulados no painel web do RabbitMQ.`;
+        }
+    </script>
+</body>
+</html>

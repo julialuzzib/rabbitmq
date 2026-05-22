@@ -1,0 +1,20 @@
+# Dependências do Node.js (Muito pesado, o 'npm install' baixa tudo depois)
+node_modules/
+package-lock.json
+
+# Arquivos de variáveis de ambiente/configurações locais
+.env
+.env.local
+
+# Dados do banco/fila criados pelo Docker (Para não travar ou corromper no Git)
+rabbitmq_data/
+
+# Logs do sistema e erros
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.eslintcache
+
+# Arquivos do sistema operacional
+.DS_Store
+Thumbs.db

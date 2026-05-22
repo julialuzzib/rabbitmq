@@ -1,0 +1,15 @@
+{
+  "name": "restaurante-rabbitmq",
+  "version": "1.0.0",
+  "description": "Sistema de Mensageria para o Restaurante Digital usando RabbitMQ",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "cozinha": "node consumer_cozinha.js",
+    "financeiro": "node consumer_pagamento.js"
+  },
+  "dependencies": {
+    "amqplib": "^0.10.4",
+    "express": "^4.19.2"
+  }
+}
